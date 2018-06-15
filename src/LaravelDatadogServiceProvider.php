@@ -17,7 +17,7 @@ class LaravelDatadogServiceProvider extends ServiceProvider
                 'api_key' => env('DATADOG_API_KEY'),
             ];
 
-            $configured = array_only(config('logging.datadog'), [
+            $configured = array_only(config('logging.datadog', []), [
                 'app_key',
                 'api_key',
                 'host',
