@@ -1,6 +1,7 @@
 {
     "name": "artmoi/laravel-datadog",
     "type": "library",
+    "description": "A better Dogstatsd integration with Laravel.",
     "keywords": [
         "laravel",
         "datadog",

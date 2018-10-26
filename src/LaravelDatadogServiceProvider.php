@@ -1,7 +1,9 @@
 <?php namespace ArtMoi\LaravelDatadog;
 
 use DataDog\DogStatsd;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Monolog\Logger;
 
@@ -10,6 +12,8 @@ class LaravelDatadogServiceProvider extends ServiceProvider
 {
     public function register()
     {
+        $this->app->singleton(Dispatcher::class, LaravelDatadogBusDispatcher::class);
+
         $this->app->singleton(DogStatsd::class, function () {
 
             $defaults = [
@@ -41,5 +45,19 @@ class LaravelDatadogServiceProvider extends ServiceProvider
                 )
             );
         });
+    }
+
+    public function boot()
+    {
+        if ($this->app->runningInConsole()) {
+
+        }
+        else {
+
+            /** @var Request $currentRequest */
+            $currentRequest = $this->app->make(Request::class);
+
+
+        }
     }
 }
