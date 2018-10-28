@@ -30,6 +30,9 @@ class DatadogMonologHandler extends AbstractProcessingHandler
      */
     private $dogStatsd;
 
+    /** @var LaravelDatadogService */
+    private $laravelDatadogService;
+
     /** @var string[] */
     private $tags;
 
@@ -41,11 +44,12 @@ class DatadogMonologHandler extends AbstractProcessingHandler
      * @param int $level
      * @param bool $bubble
      */
-    public function __construct(DogStatsd $dogStatsd, $tags = [], $level = Logger::DEBUG, $bubble = true)
+    public function __construct(DogStatsd $dogStatsd, LaravelDatadogService $laravelDatadogService, $tags = [], $level = Logger::DEBUG, $bubble = true)
     {
         parent::__construct($level, $bubble);
 
         $this->dogStatsd = $dogStatsd;
+        $this->laravelDatadogService = $laravelDatadogService;
         $this->tags = $tags;
     }
 
@@ -62,7 +66,13 @@ class DatadogMonologHandler extends AbstractProcessingHandler
             $record['message'],
             [
                 'text' => $record['formatted'],
-                'tags' => $this->tags,
+                'aggregation_key' => $this->laravelDatadogService->getAggregationKey(),
+                'tags' => array_replace_recursive(
+                    [
+                        'aggregation_key' => $this->laravelDatadogService->getAggregationKey(),
+                    ],
+                    $this->tags
+                ),
                 'alert_type' => isset(static::MONOLOG_DOGSTATSD_MAP[$record['level']])
                     ? static::MONOLOG_DOGSTATSD_MAP[$record['level']]
                     : 'info',

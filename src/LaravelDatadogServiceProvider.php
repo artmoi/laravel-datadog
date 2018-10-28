@@ -1,7 +1,6 @@
 <?php namespace ArtMoi\LaravelDatadog;
 
 use DataDog\DogStatsd;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
@@ -12,14 +11,24 @@ class LaravelDatadogServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->singleton(Dispatcher::class, LaravelDatadogBusDispatcher::class);
+        if ($this->app->runningInConsole()) {
+
+            $this->app->bind(LaravelDatadogService::class);
+        }
+        else {
+
+            $this->app->singleton(LaravelDatadogService::class);
+        }
+
+        $this->app->extend(\Illuminate\Bus\Dispatcher::class, function ($defaultDispatcher) {
+
+            return new LaravelDatadogBusDispatcher($this->app, function ($connection = null) {
+
+                return $this->app->make(QueueFactoryContract::class)->connection($connection);
+            });
+        });
 
         $this->app->singleton(DogStatsd::class, function () {
-
-            $defaults = [
-                'app_key' => env('DATADOG_APP_KEY'),
-                'api_key' => env('DATADOG_API_KEY'),
-            ];
 
             $configured = array_only(config('logging.datadog', []), [
                 'app_key',
@@ -31,13 +40,14 @@ class LaravelDatadogServiceProvider extends ServiceProvider
                 'curl_ssl_verify_peer',
             ]);
 
-            return new DogStatsd(array_merge($defaults, $configured));
+            return new DogStatsd($configured);
         });
 
-        $this->app->singleton(DatadogMonologHandler::class, function (Application $app) {
+        $this->app->bind(DatadogMonologHandler::class, function (Application $app) {
 
             return new DatadogMonologHandler(
                 $app->make(DogStatsd::class),
+                $app->make(LaravelDatadogService::class),
                 config('logging.datadog.tags', []),
                 config('logging.datadog.level', config('app.debug')
                     ? Logger::DEBUG
@@ -47,17 +57,11 @@ class LaravelDatadogServiceProvider extends ServiceProvider
         });
     }
 
-    public function boot()
+    public function boot(LaravelDatadogService $laravelDatadogService)
     {
-        if ($this->app->runningInConsole()) {
+        if (!$this->app->runningInConsole()) {
 
-        }
-        else {
-
-            /** @var Request $currentRequest */
-            $currentRequest = $this->app->make(Request::class);
-
-
+            $laravelDatadogService->initialize();
         }
     }
 }

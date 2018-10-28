@@ -13,7 +13,12 @@ class LaravelDatadogBusDispatcher extends Dispatcher
      */
     public function dispatch($command)
     {
-        parent::dispatch($command);
+        /** @var LaravelDatadogService $laravelDatadogService */
+        $laravelDatadogService = $this->container->make(LaravelDatadogService::class);
+
+        $command->laravelDatadogAggregationKey = $laravelDatadogService->getAggregationKey();
+
+        return parent::dispatch($command);
     }
 
     /**
@@ -25,6 +30,12 @@ class LaravelDatadogBusDispatcher extends Dispatcher
      */
     public function dispatchNow($command, $handler = null)
     {
-        parent::dispatchNow($command, $handler);
+        /** @var LaravelDatadogService $laravelDatadogService */
+        $laravelDatadogService = $this->container->make(LaravelDatadogService::class);
+
+        $laravelDatadogService->initialize(object_get($command, 'laravelDatadogAggregationKey'));
+        unset($command->laravelDatadogAggregationKey);
+
+        return parent::dispatchNow($command, $handler);
     }
 }
