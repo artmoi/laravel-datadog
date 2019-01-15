@@ -4,6 +4,7 @@ use DataDog\DogStatsd;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Monolog\Logger;
 
 
