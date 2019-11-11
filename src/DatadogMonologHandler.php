@@ -83,7 +83,7 @@ class DatadogMonologHandler extends AbstractProcessingHandler
     /**
      * @inheritdoc
      */
-    protected function getDefaultFormatter()
+    protected function getDefaultFormatter(): Monolog\Formatter\FormatterInterface
     {
         return new JsonFormatter();
     }
