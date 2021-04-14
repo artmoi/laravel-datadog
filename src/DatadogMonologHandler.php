@@ -60,7 +60,7 @@ class DatadogMonologHandler extends AbstractProcessingHandler
      *
      * @return void
      */
-    protected function write(array $record)
+    protected function write(array $record): void
     {
         $this->dogStatsd->event(
             $record['message'],
@@ -83,7 +83,7 @@ class DatadogMonologHandler extends AbstractProcessingHandler
     /**
      * @inheritdoc
      */
-    protected function getDefaultFormatter()
+    protected function getDefaultFormatter(): \Monolog\Formatter\FormatterInterface
     {
         return new JsonFormatter();
     }

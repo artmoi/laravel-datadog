@@ -15,10 +15,10 @@
         }
     ],
     "require": {
-        "laravel/framework": "^5.6",
+        "laravel/framework": ">=6",
         "myclabs/php-enum": "^1.6",
         "datadog/php-datadogstatsd": "^1.0",
-        "ramsey/uuid": "^3.8"
+        "ramsey/uuid": ">=3.8"
     },
     "autoload": {
         "psr-4": {
